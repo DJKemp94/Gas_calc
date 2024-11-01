@@ -365,7 +365,7 @@ function Calculate2() {
       messageColor = "green";
     }
   } else if (gasType === "flammable") {
-    message = "<br><b>Please compare this to the  <a href='https://www.engineeringtoolbox.com/explosive-concentration-limits-d_423.html'>LEL for your gas</a> to confirm whether detection is required. <br>Note: Detection is required if the calculated percentage is 25% or over the LEL for the gas.</b><br> Common example of LELs include: <ul> <li>Acetylene: 2%</li><li>Hydrogen: 4%</li><li>Methane: 5%</li>";
+    message = "<br><b>Please compare this to the  <a href='https://www.engineeringtoolbox.com/explosive-concentration-limits-d_423.html'>LEL for your gas</a> to confirm whether detection is required. <br>Note: Detection is required if the calculated percentage is greater than 25% of the LEL for the gas.</b><br> Common example of LELs include: <ul> <li>Acetylene: 2%</li><li>Hydrogen: 4%</li><li>Methane: 5%</li>";
   } else if (gasType === "toxic") {
     message = "<br><b>Please compare this to the <a href='https://www.hse.gov.uk/pubns/priced/eh40.pdf'>WEL for your gas</a> (Page 9 of EH40 onwards). Detection is needed if the calculated value exceeds the WEL. <br>Note: Detection is required if the calculated ppm is over the WEL for the gas.</b><br> Common example of WELs include: <ul> <li>Ammonia: 25ppm</li><li>Carbon Monoxide: 30ppm</li><li>Hydrogen Sulphide: 5ppm</li></b>";
   }
