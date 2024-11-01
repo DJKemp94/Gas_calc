@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gas Safety Calculator: Toxic, Flammable and Enrichment</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #e7ecf0;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+      margin: 0;
+    }
+    
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      overflow: auto;
+      padding: 0 20px;
+    }
+
+    .header,
+    .content,
+    .footer {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+
+    input[type='number'],
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      /* So padding doesn't affect width */
+    }
+   input[type='text'],
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      /* So padding doesn't affect width */
+    }
+
+
+    button {
+      background-color: #002060;
+      color: white;
+      border: 0;
+    }
+
+    button:hover {
+      background-color: #4cae4c;
+    }
+
+    .result {
+      background-color: #f2f2f2;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+  </style>
+  <style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #002060;
+  color: white;
+  text-align: center
+}
+
+/* Container styles */
+/* Container styles */
+
+
+/* Icon styles  */
+#explanationIcon {
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: top;
+  background-color: #333;
+  color: #fff;
+  padding: 0px 10px;
+  border-radius: 100%;
+  margin-left: 5px;
+}
+
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+#clearDataButton {
+  position: fixed; /* Fixed position to stay in the viewport */
+  bottom: 20px; /* Distance from the bottom */
+  right: 20px; /* Distance from the right */
+  padding: 10px 20px; /* Padding around the text */
+  background-color: #ffeb3b; /* Light yellow background color */
+  color: black; /* Black text color */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  width: auto; /* Auto width based on content */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adding a shadow for better visibility */
+}
+
+#clearDataButton:hover {
+  background-color: #fdd835; /* A slightly darker yellow when hovered */
+}
+
+
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+</style>
+
+</head>
+
+<!--start of body script -->
+
+<body>
+  <div id="container">
+
+    <script language="JavaScript" type="text/javascript">
+      var numb = '0123456789.';
+var lwr = 'abcdefghijklmnopqrstuvwxyz';
+var upr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+function isValid(parm,val) {
+if (parm == "") return true;
+for (i=0; i<parm.length; i++) {
+if (val.indexOf(parm.charAt(i),0) == -1) return false;
+}
+return true;
+}
+
+function isNum(parm) {return isValid(parm,numb);}
+function isLower(parm) {return isValid(parm,lwr);}
+function isUpper(parm) {return isValid(parm,upr);}
+function isAlpha(parm) {return isValid(parm,lwr+upr);}
+function isAlphanum(parm) {return isValid(parm,lwr+upr+numb);} 
+
+var calculatedValues = {};
+
+function toggleContent(event) {
+  event.preventDefault(); // Prevent the default action (e.g., a form submission)
+
+  var content = document.getElementById('detailedInstructions');
+  if (content.style.display === 'none' || content.style.display === '') {
+    content.style.display = 'block'; // Show the content
+  } else {
+    content.style.display = 'none'; // Hide the content
+  }
+}
+
+function clearData() {
+  // Use querySelectorAll to select all input elements except for the atmosphericPressure input
+  document.querySelectorAll('input').forEach(input => {
+    if (input.id !== "atmosphericPressure") { // Skip resetting the atmosphericPressure input
+      if (input.type === "checkbox") {
+        input.checked = false; // Reset checkboxes
+      } else if (input.type === "number" || input.type === "text") {
+        input.value = ''; // Clear number and text inputs
+      }
+    }
+  });
+
+  // Reset select elements if you have any (not mentioned but added for completeness)
+  document.querySelectorAll('select').forEach(select => {
+    select.value = select.options[0].value; // Reset to the first option
+  });
+
+  // Reset disabled inputs if necessary
+  document.getElementById("volumeGas").disabled = false;
+  
+  // Clear results displayed in the 'result' divs
+  document.querySelectorAll('.result').forEach(result => {
+    result.innerHTML = '';
+  });
+
+  // Reset the calculatedValues object (assuming it's a global object used elsewhere in your app)
+  calculatedValues = {};
+
+  // Scroll to the top of the page
+  window.scrollTo(0, 0);
+}
+
+function handleClick(radioButton) {
+  // Hide all sections initially
+  var sectionsToHide = ['calculation1', 'gasVolumeCalculator', 'calculation3'];
+  sectionsToHide.forEach(function(sectionId) {
+    document.getElementById(sectionId).style.display = 'none';
+  });
+  
+  // Show the appropriate sections based on the clicked radio button
+  if (radioButton.value === 'calc1') {
+    document.getElementById('calculation3').style.display = 'block';
+  } else if (radioButton.value === 'calc2') {
+    document.getElementById('calculation1').style.display = 'block';
+    document.getElementById('calculation3').style.display = 'block';
+  } else if (radioButton.value === 'calc3') {
+    document.getElementById('gasVolumeCalculator').style.display = 'block';
+    document.getElementById('calculation3').style.display = 'block';    
+  }
+}
+
+function Calculate1() {
+  var cylpressure = document.getElementById("initialPressure").value;
+  var cylvolume = document.getElementById("cylinderVolume").value;
+  var atmospressure = 1.013;
+  var volumeGas = Math.round(((cylpressure * (cylvolume/1000)) / atmospressure) * Math.pow(10, 2)) / Math.pow(10, 2);
+
+  // Update the result1 div
+  document.getElementById("result1").innerHTML = "Volume of gas in cylinder = <strong>" + volumeGas + "m³</strong>";
+
+  // Set the value of the gasVolume input field
+  document.getElementById("volumeGas").value = volumeGas;
+  document.getElementById("volumeGas").disabled = true; 
+
+  // Get values for report:
+  if (cylpressure !== "") {
+    calculatedValues.cylpressure = cylpressure;
+  }
+  if (cylvolume !== "") {
+    calculatedValues.cylvolume = cylvolume;
+  }
+   if (volumeGas !== "") {
+    calculatedValues.volumeGas = volumeGas;
+  }
+}
+
+
+function Calculate2() {
+  var volgas = parseFloat(document.getElementById("volumeGas").value);
+  var roomvolume = parseFloat(document.getElementById("roomVolume").value);
+  var gasType = document.getElementById("gasType").value;
+  var message = "";
+  var messageColor = "";
+  var checkbox = document.getElementById("volumeCheckbox").checked;
+
+  if (checkbox) {
+    roomvolume *= 0.6; // Decrease room volume by 40%
+  }
+  
+
+  // Ensure volgas is within bounds
+  if (volgas <= 0) {
+    volgas = 0;
+  } else if (volgas >= roomvolume) {
+    volgas = roomvolume;
+  }
+
+  var concgas;
+
+  if (gasType === "oxygen") {
+    var displacegas = 0.21*volgas;
+    concgas = (((roomvolume*0.21) + volgas - displacegas)/roomvolume)*100;
+    document.getElementById("result2").innerHTML = "Concentration of gas in room: <strong>" + concgas.toFixed(2) + "%" + "</strong>";
+  } else if (gasType === "toxic") {
+    concgas = Math.round(((volgas / roomvolume) * 10000) * Math.pow(10, 2)) / Math.pow(10, 2);
+    document.getElementById("result2").innerHTML = "Concentration of gas in room: <strong>" + concgas + " ppm" + "</strong>";
+ } else if (gasType === "asphyxiant") {
+    var vrvg = roomvolume - volgas;
+    var vo = vrvg * 0.2095; // Assuming that 20.95% is the normal oxygen level in air
+    var concgas = Math.round(((vo * 100) / roomvolume) * Math.pow(10, 2)) / Math.pow(10, 2);
+    document.getElementById("result2").innerHTML = "Concentration of gas in room: <strong>" + concgas.toFixed(2) + "%" + "</strong>";
+  } else {
+    concgas = Math.round(((volgas / roomvolume) * 100) * Math.pow(10, 2)) / Math.pow(10, 2);
+    // Ensure concgas is within bounds for non-toxic gases
+    if (concgas > 100) {
+      concgas = 100;
+    }
+    document.getElementById("result2").innerHTML = "Concentration of gas in room: <strong>" + concgas + "%" + "</strong>";
+  }
+
+  // Ensure concgas is not negative
+  if (concgas < 0) {
+    concgas = 0;
+  }
+
+  if (gasType === "carbon-dioxide") {
+    if (concgas > 0.5) {
+      message = "<b>CO2 Detection required</b>";
+      messageColor = "red";
+    } else {
+      message = "<b>CO2 Detection is not likely to be required</b>";
+      messageColor = "green";
+    }
+  } else if (gasType === "oxygen") {
+    if (concgas > 23.5) {
+      message = "<b>O2 Detection required</b>"
+      messageColor = "red";
+    } else {
+      message = "<b>O2 Detection is not likely to be required</b>"
+      messageColor = "green";
+    }
+  } else if (gasType === "asphyxiant") {
+    if (concgas < 18) {
+      message = "<b>O2 Detection necessary</b>"
+      messageColor = "red";
+    } else if (concgas <= 19.5) {
+      message = "<b>Further assessment of risk necessary</b>"
+      messageColor = "orange";
+    } else if (concgas <= 23) {
+      message = "<b>No detection required</b>"
+      messageColor = "green";
+    }
+  } else if (gasType === "flammable") {
+    message = "<br><b>Please compare this to the  <a href='https://www.engineeringtoolbox.com/explosive-concentration-limits-d_423.html'>LEL for your gas</a> to confirm whether detection is required. <br>Note: Detection is required if the calculated percentage is 25% or over the LEL for the gas.</b><br> Common example of LELs include: <ul> <li>Acetylene: 2%</li><li>Hydrogen: 4%</li><li>Methane: 5%</li>";
+  } else if (gasType === "toxic") {
+    message = "<br><b>Please compare this to the <a href='https://www.hse.gov.uk/pubns/priced/eh40.pdf'>WEL for your gas</a> (Page 9 of EH40 onwards). Detection is needed if the calculated value exceeds the WEL. <br>Note: Detection is required if the calculated ppm is over the WEL for the gas.</b><br> Common example of WELs include: <ul> <li>Ammonia: 25ppm</li><li>Carbon Monoxide: 30ppm</li><li>Hydrogen Sulphide: 5ppm</li></b>";
+  }
+
+  if (message !== "") {
+    document.getElementById("result2").innerHTML += "<br><span style='color:" + messageColor + ";'>" + message + "</span>";
+  }
+
+calculatedValues.concgas = concgas;
+calculatedValues.message = message;
+calculatedValues.messageColor = messageColor;
+}
+
+
+
+
+
+function calculateVolume() {
+  var weight = document.getElementById('weight').value;
+  var specificVolume = document.getElementById('specificVolume').value;
+  var volume = weight * specificVolume;
+
+  // Create the text content with bolded section
+  var resultText = "Volume of gas in cylinder = <b>" + volume.toFixed(2) + 'm³</b>';
+
+  // Set the text content with bolded formatting
+  document.getElementById('result').innerHTML = resultText;
+
+  document.getElementById("volumeGas").value = volume;
+  document.getElementById("volumeGas").disabled = true;
+
+    if (weight !== "") {
+    calculatedValues.weight = weight;
+  }
+  if (specificVolume !== "") {
+    calculatedValues.specificVolume = specificVolume;
+  }
+   if (volume !== "") {
+    calculatedValues.volume = volume;
+  }
+
+}
+
+function generateReport() {
+  var reportHTML = `
+    <html>
+    <head>
+            <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          color: #333;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 0px;
+        }
+        h1, h2 {
+          color: #0056b3;
+        }
+        p {
+          font-size: 14px;
+          line-height: 1;
+        }
+        span {
+          font-weight: bold;
+        }
+        .header {
+          background-color: #e9ecef;
+          padding: 0px;
+          border-radius: 5px;
+          margin-bottom: 0px;
+        }
+        .section {
+          background-color: white;
+          padding: 0px;
+          border-radius: 5px;
+          margin-bottom: 0px;
+        }
+        .important {
+          color: red;
+        }
+      </style>
+    </head>
+    <body>
+      <div class='header'>
+        <h1>Calculation Report</h1>
+        <p>The information below is a report generated based on a series of gas calculations you have performed using the University of Nottingham Gas Calculator. Please note that the methods for these calculations are based on guidance from the British Compressed Gas Association, and the recommendations are a reflection of this guidance as well as University of Nottingham policy. The University of Nottingham and University of Nottingham Health and Safety Department does not claim responsibility for any issues encountered directly as the result of recommendations from this calculator.</p>
+      </div>
+      <div class='section'>
+        <h2>Location Details</h2>
+        <p>Lab Location: ${document.getElementById("lab_location").value || "No value provided"}</p>
+        <p>Gas Name: ${document.getElementById("gas_name").value || "No value provided"}</p>
+      </div>
+      <div class='section'>
+        <h2>Gas Details</h2>
+        <p>Gas Type: ${document.getElementById("gasType").value || "No value provided"}</p>
+        <p>Gas Volume: ${document.getElementById("volumeGas").value ? document.getElementById("volumeGas").value + " m³" : "No value provided"}</p>
+      </div>
+      <div class='section'>
+        <h2>Room Details</h2>
+        <p>Room Volume: ${document.getElementById("roomVolume").value ? document.getElementById("roomVolume").value + " m³" : "No value provided"}</p>
+        <p>Volume Reduction Applied: ${document.getElementById("volumeCheckbox").checked ? "Yes (40% reduction)" : "No"}</p>
+      </div>
+      <div class='section'>
+        <h2>Compressed Gas: Gas Volume</h2>
+        <p>Initial Pressure: ${document.getElementById("initialPressure").value ? document.getElementById("initialPressure").value + " bar" : "No value provided"}</p>
+        <p>Cylinder Water Capacity: ${document.getElementById("cylinderVolume").value ? document.getElementById("cylinderVolume").value + " L" : "No value provided"}</p>
+        <p>Calculated Gas Volume: ${calculatedValues.volumeGas ? calculatedValues.volumeGas + " m³" : "No value calculated"}</p>
+      </div>
+      <div class='section'>
+        <h2>Liquefied Gas: Gas Volume</h2>
+        <p>Weight of Contents: ${document.getElementById("weight").value ? document.getElementById("weight").value + " kg" : "No value provided"}</p>
+        <p>Specific Volume: ${document.getElementById("specificVolume").value ? document.getElementById("specificVolume").value + " m³/kg" : "No value provided"}</p>
+        <p>Calculated Gas Volume: ${calculatedValues.volume ? calculatedValues.volume.toFixed(2) + " m³" : "No value calculated"}</p>
+      </div>
+      <div class='section'>
+        <h2>Results & Recommendations</h2>
+        <p>Gas Concentration: ${calculatedValues.concgas ? 
+          (document.getElementById("gasType").value === "toxic" ? calculatedValues.concgas + " ppm" : calculatedValues.concgas + " %") 
+          : "No value calculated"}</p>
+        <p>Recommendation: <span style='color: ${calculatedValues.messageColor || "#000"};'>${calculatedValues.message || "No recommendation made (calculation incomplete)"}</span></p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Create a new window and write the report content
+  var reportWindow = window.open("", "Calculation Report", "width=800,height=600");
+  reportWindow.document.write(reportHTML);
+  reportWindow.document.close();
+  reportWindow.onload = function() {
+    reportWindow.focus();
+    reportWindow.print();
+    reportWindow.close();
+  };
+}
+
+$(document).ready(function() {
+  // Show the explanation modal when the icon is clicked
+  $("#explanationIcon").click(function() {
+    $("#explanationModal").show();
+  });
+
+  // Close the explanation modal when the close button is clicked
+  $(".close").click(function() {
+    $("#explanationModal").hide();
+  });
+
+  // Close the explanation modal when clicking outside the modal
+  $(window).click(function(event) {
+    if (event.target == document.getElementById("explanationModal")) {
+      $("#explanationModal").hide();
+    }
+  });
+});
+    </script>
+
+    <body>
+
+<button id="clearDataButton" onclick="clearData()">Clear All and Start Again</button>
+
+</div>
+      <div class="container">
+<div class="header">
+  <h1>Gas Safety Calculator: Asphyxiant, Toxic, Flammable and Enrichment<div id="explanationIcon">ℹ</div></h1>
+</div>
+<div id="explanationModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <strong>What does this calculator do?</strong>
+    <p>The calculator considers a scenario where a compressed gas cylinder containing a single gas is being used in a workplace or room. It estimates what would happen if the entire contents of that gas cylinder were released into the room all at once.</p>
+    <p>It does this by first determining how much gas is actually stored inside the cylinder based on the cylinder's size and the pressure it's filled to.</p>
+    <p>Next, it compares the volume of gas that could be released from the cylinder to the free air volume of the room or workplace. This allows it to calculate the percentage of the gas in the air after the gas has displaced the initial contents of the air.</p>
+    <p>If the concentration of the gas in the air is within a toxic exposure limit, or above a certain proportion of the lower explosive limit, it means there could be a risk of toxic exposure would could lead to long-term health complications. Alternatively, the ability for a self-sustaining fire to be caused can increase.</p>
+    <p>For asphyxiant gases, this displacement reduces the available oxygen for a person to breathe.</p>
+    <p>If the estimated oxygen level falls below a certain threshold, it means there could be a risk of oxygen deficiency to a person within that room, leading to light-headedness, fainting or, ultimately, hypoxia and death by asphyxiation.</p>
+    <p>The calculator shows what the worst-case scenario could be, and it suggests to the user whether a detection system may or may not be necessary.</p>
+
+
+
+  </div>
+        </div>
+
+        <div class = "content">
+<button onclick="toggleContent(event)">Show/Hide Detailed Instructions</button>
+
+  </div>
+
+          <div class="content" id="detailedInstructions" style="display: none;>
+          
+          <h3>Instructions and what you need to know:</h3>
+          <p>
+            This calculator can be used if you have a gas cylinder with a single gas.<br> 
+<span style="color: red;"><strong>Note: This program will allow you to calculate the potential for oxygen deficient environments, toxic exposure, gas (including oxygen) enrichment and a flammable atmosphere occuring. You must always consider all the hazards related to each gas or mixture of gases and look to treat these all accordingly.</strong></span>
+
+                    <p>If you have a <strong>compressed</strong> gas cylinder, and you don't know the volume of gas <a href="#calculation1">complete sections 1 and
+              3.</a></p>
+          <p>
+            If you have a <strong>liquefied</strong> gas cylinder and you don't know the volume of gas, <a href="#gasVolumeCalculator">complete sections 2
+              and 3.</a></p>
+          <p>
+          <p><strong>If you know the volume of gas</strong> that could expand into the room, <a
+              href="#Calculation3">complete section 3.</a>
+
+
+
+          <p><strong>To use this calculator, you will need to know:</strong>
+          <ol>
+            <li>Contents of the cylinder and the relevant hazards i.e. what gas is in the cylinder and what threat it poses (asphxyiant, enrichment, toxic, flammable);</li><br>
+            <li>Whether the gas is <strong>compressed</strong> (the contents of the cylinder are in the gaseous form) or
+              <strong>liquefied</strong> (the
+              contents are in the liquid phase)
+            </li><br>
+            <li>Depending on whether the gas if compressed or liquefied, you will also need to know the following:</li>
+
+            <style>
+              table {
+                border-collapse: collapse;
+                /* Ensures borders are drawn within cells */
+                border: 1px solid black;
+                /* Defines border style and color for the entire table */
+              }
+
+              th {
+                font-weight: bold;
+                /* Makes text in header cells bold */
+                border: 1px solid black;
+                /* Adds borders to individual header cells */
+              }
+
+              td {
+                border: 1px solid black;
+                /* Adds borders to individual data cells */
+              }
+            </style>
+
+            <table>
+              <tr>
+                <th>Compressed Gas</th>
+                <th>Liquefied gas</th>
+              </tr>
+              <tr>
+                <td>Pressure of cylinder (bar)</td>
+                <td>Weight of gas in cylinder (kg)</td>
+              </tr>
+              <tr>
+                <td>*Cylinder water capacity (L)</td>
+                <td>**Specific volume (m³/kg)</td>
+              </tr>
+            </table>
+            <i><strong>*Note:</strong> Some gas cylinder providers will provide you with the volume of the gas, whereas some will provide the water volume of the cylinder. The cylinder water volume will usually be on the order of 10s of litres or less.</a></i><br>
+            <i><strong>**Note: </strong>The specific volume of the substance corresponds to the amount of volume taken up per kg of the substance. You may be able to find these online on websites such as <a href="https://www.engineeringtoolbox.com/">Engineering Toolbox.</a></i>
+            <br><br>
+            <li>The volume of the room that the cylinder resides within (this should be the <strong>free volume</strong>
+              i.e. the volume of the
+              room after subtracting the volume of all
+              furniture/equipment)</li>
+              </ol>
+
+            <p>After calculating the volume of the gas released, compare your calculated percentage volume or ppm with the relevant limit for the released gas:</li><br>
+        <br>For <strong>asphyxiant</strong> gases:
+            <br>The remaining oxygen concentration should be compared to the accepted lower limit (19.5% concentration).
+            <br>
+          <br>For <strong>toxic</strong> gases:
+            <br>You should take the % value calculated in section 3 and compare this to the Workplace Exposure Limit value in
+            <a href="https://www.hse.gov.uk/pubns/priced/eh40.pdf" target="_blank" class="text-blue-500">EH40</a><br>
+            <strong>Note:</strong> You may need to convert your percentage value to ppm (by multiplying the % by 10,000)
+            <br><br>
+          For <strong>flammable</strong> gases:
+            <br>You should take the % value calculated in section 3 and compare this to the lower explosive limit for the gas.<br>
+            A list of these can be located in the <a
+              href="https://www.engineeringtoolbox.com/explosive-concentration-limits-d_423.html" target="_blank"
+              class="text-blue-500">Engineering Toolbox</a><br>
+            The percentage concentration calculated must not exceed 25% of the lower explosive limit.
+
+            <br><br>
+          For <strong>oxygen/carbon dioxide enrichment</strong>:
+            <br>You should take the % value calculated in section 3 and compare this to the upper  limit for the gas in use (0.5% for CO2 and 23.5% for O2)      
+          <p>
+            <strong>If you do not know the free air volume of the location the calculation is being carried out in, ensure you tick the box to indicate this. This will reduce the volume by 40% to provide a conservative estimate of the free air volume.</strong>
+        </div>
+
+<div class="content">
+          <section id="area details">
+            <h2>Area/Gas Details:</h2>
+            <form name="form1">
+              <h5>
+                <p>Please enter the details for the area you are carrying out these calculations for. These will be reflected on the report you can print at the end of the calculation.</p>
+              </h5>
+              <label for="lab_location">Enter the building and lab number this calculation is for:</label>
+              <input type="text" id="lab_location" placeholder="Enter building/lab number">
+              <label for="gas_name">Please enter the name of the gas you are performing this calculation for:</label>
+              <input type="text" id="gas_name" placeholder="Enter gas name e.g. Hydrogen, Helium, Ammonia, etc">
+
+</div>
+
+<div class="content">
+          <section id="radio_but">
+            <h2>Cylinder Information:</h2>
+            <form name="form1">
+              <h5>
+                <p>Please select the situation you want to perform your calculation for:</p>
+              </h5>
+              <label><input type="radio" name="calcOption" onclick="handleClick(this);" value="calc1" /> I have a compressed gas cylinder or liquefied gas cylinder, but I already know the volume of the contents.</label><br/>
+<label><input type="radio" name="calcOption" onclick="handleClick(this);" value="calc2" /> I have a compressed gas cylinder, but I don't know the volume of the contents.</label><br/>
+<label><input type="radio" name="calcOption" onclick="handleClick(this);" value="calc3" /> I have a liquefied gas cylinder, but I don't know the volume of the contents.</label><br/>
+</div>
+
+
+        <div class="content" id="calculation1" style="display: none;">
+          <section id="calculation1">
+            <h2>1. Calculate volume of gas released in worst case scenario</h2>
+            <form name="form1">
+              <h5>
+                <p>To use the calculator below, you must have a gas cylinder which contains a compressed gas. 
+                  You must know the pressure of the gas in the cylinder (e.g., 270 bar) and the water volume of the
+                  cylinder (e.g., 50 litre).</p>
+              </h5>
+              <label for="initialPressure">Initial pressure of gas in cylinder [bar]:</label>
+              <input type="number" id="initialPressure" placeholder="Enter pressure in bar">
+
+              <label for="cylinderVolume">Cylinder water capacity [L]:</label>
+              <input type="number" id="cylinderVolume" placeholder="Enter volume in L">
+
+              <label for="atmosphericPressure">Atmospheric pressure [bar]:</label>
+              <input type="number" id="atmosphericPressure" value="1.013" disabled="disabled">
+
+              <button type="button" onclick="Calculate1()">Calculate</button>
+            </form>
+            <div class="result" id="result1">Volume of gas in cylinder [m³]</div>
+            <h4>Proceed to Step 3 - your calculated value will be prepopulated into the relevant field.</h4>
+          </section>
+        </div>
+
+        <div class="content" id="gasVolumeCalculator" style="display: none;">
+          <section id="gasVolumeCalculator">
+            <h2>2.Gas Volume Calculator</h2>
+            <h5>If you have a liquefied gas and you know the mass of the contents in the cylinder, but not the volume,
+              use the calculator below to first calculate the volume of the gas.</h5>
+            <form name="gasVolumeForm">
+              <label for="weight">Weight of contents (kg):</label>
+              <input type="number" id="weight" name="weight" step="0.001" required>
+
+              <label for="specificVolume">Specific Volume (m³/kg):</label>
+              <input type="number" id="specificVolume" name="specificVolume" step="0.00001" required>
+
+              <button type="button" onclick="calculateVolume()">Calculate</button>
+            </form>
+            <div class="result" id="result">Volume of gas in cylinder (m³):</div>
+            <h4>Proceed to Step 3 - your calculated value will be prepopulated into the relevant field.</h4>
+          </section>
+        </div>
+
+<div class="content" id="calculation3" style="display: none;">
+    <section id="calculation3">
+          <h2 class="text-2xl font-bold mb-4">3. Calculate concentration of gas in room</h2>
+          <h5>Enter the volume of the room into the relevant field and select the gas type, then click "Calculate". Any
+            values calculated in Section 1 or 2 will be pre-populated into the relevant field.</h5>
+          </p>
+          <form>
+            <div class="mb-4">
+              <label for="volumeGas" class="block font-bold mb-2">Volume of gas in cylinder [m³]:</label>
+              <input type="number" id="volumeGas" class="border border-gray-300 rounded py-2 px-4 w-full" placeholder="Enter volume of gas in m³">
+            </div>
+            <div class="mb-4">
+              <label for="roomVolume" class="block font-bold mb-2">Volume of room [m³]:</label>
+              <input type="number" id="roomVolume" class="border border-gray-300 rounded py-2 px-4 w-full" placeholder="Enter volume of room in m³">
+            </div>
+              <div class="mb-4">
+                        <label><input type="checkbox" id="volumeCheckbox" /> I do not know the free air volume of the area, and have entered the room volume above instead.</label>
+            </div>
+            <div class="mb-4">
+              <label for="gasType" class="block font-bold mb-2">Gas being used:</label>
+              <select id="gasType" class="border border-gray-300 rounded py-2 px-4 w-full">
+<option value="asphyxiant">Asphyxiant (O2 Depletion)</option>
+<option value="carbon-dioxide">Carbon Dioxide (Enrichment)</option>
+<option value="oxygen">Oxygen (Enrichment)</option>
+<option value="flammable">Flammable</option>
+<option value="toxic">Toxic</option>
+</select>
+            </div><br>
+            <button type="button" class="btn" onclick="Calculate2()">Calculate</button>
+          </form>
+          <div class="result" id="result2">Concentration of gas in room %</div>
+          <button onclick="generateReport()">Generate Report</button>
+        </div>
+      </div>
+  </div>
+
+      </div>
+  </div>
+  <form>
+
+</body>
+
+</html>
